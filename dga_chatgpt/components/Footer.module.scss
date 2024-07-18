@@ -1,0 +1,21 @@
+// styles/Footer.module.scss
+
+.pageFooter {
+  @apply bg-gray-900 text-white p-4;
+
+  .pageFooterContainer {
+    @apply max-w-7xl mx-auto flex flex-col items-center;
+
+    .pageFooterLinks {
+      @apply flex space-x-4 mb-4;
+
+      a {
+        @apply text-white hover:underline;
+      }
+    }
+
+    .pageFooterCopy {
+      @apply text-sm text-center;
+    }
+  }
+}

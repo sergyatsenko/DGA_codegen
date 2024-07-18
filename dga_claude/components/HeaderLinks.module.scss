@@ -1,0 +1,35 @@
+.headerLinks {
+  @apply bg-white;
+
+  .headerLinksContainer {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between;
+  }
+
+  .emblemLogo {
+    @apply text-2xl font-bold text-gray-800 no-underline;
+  }
+
+  .btnRight {
+    @apply ml-auto;
+  }
+
+  .btnAutoBttn {
+    @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-200;
+  }
+
+  .welcomeLinks {
+    @apply mt-2 flex flex-wrap justify-center;
+
+    a {
+      @apply text-sm text-gray-600 hover:text-gray-900 mr-4 mb-2;
+    }
+  }
+
+  .memberAlertContainer {
+    @apply bg-yellow-100 p-4 hidden;
+  }
+
+  .memberAlertText {
+    @apply text-yellow-800 text-sm;
+  }
+}

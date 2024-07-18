@@ -1,0 +1,43 @@
+.subHeaderInnerContainer {
+  @apply bg-gray-800 p-4 text-white;
+
+  .mainMenu {
+    @apply flex flex-col md:flex-row space-x-4;
+
+    li {
+      @apply relative;
+
+      div {
+        @apply font-bold;
+
+        .link,
+        .menuEmployers {
+          @apply text-white no-underline cursor-pointer;
+        }
+
+        .menuEmployers {
+          @apply cursor-default;
+        }
+      }
+
+      ul {
+        @apply hidden absolute bg-gray-700 p-4 mt-2;
+
+        li {
+          @apply my-2;
+
+          .subLink {
+            @apply text-white no-underline;
+            &:hover {
+              @apply underline;
+            }
+          }
+        }
+      }
+
+      &:hover > ul {
+        @apply block;
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.pageFooter {
+  @apply w-full bg-gray-100;
+
+  .pageFooterContainer {
+    @apply max-w-7xl mx-auto px-4 py-8;
+
+    .pageFooterLinks {
+      @apply flex flex-wrap justify-center mb-4;
+
+      a {
+        @apply text-gray-600 hover:text-gray-900 mx-2 my-1;
+      }
+    }
+
+    .pageFooterCopy {
+      @apply text-center text-sm text-gray-500;
+    }
+  }
+}

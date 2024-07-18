@@ -1,0 +1,40 @@
+.subHeader {
+  @apply bg-white;
+
+  nav {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+
+    ul {
+      @apply flex justify-between;
+
+      li {
+        @apply relative;
+
+        > span,
+        > a {
+          @apply block py-2 px-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900;
+        }
+
+        &:hover > ul {
+          @apply block;
+        }
+
+        ul {
+          @apply absolute z-10 hidden w-48 bg-white shadow-lg;
+
+          li {
+            @apply w-full;
+
+            a {
+              @apply block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.menuEmployers {
+  @apply cursor-default;
+}

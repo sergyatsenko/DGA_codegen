@@ -1,0 +1,65 @@
+// SearchResults.module.scss
+
+.innerContentMain {
+  @apply w-full;
+
+  .searchBox {
+    @apply mb-4;
+  }
+
+  .greyBox {
+    @apply bg-gray-200 p-4 mb-4;
+  }
+
+  .resultsSummary {
+    @apply mb-4;
+  }
+
+  .searchResults {
+    @apply mb-4;
+
+    .tickerResults {
+      @apply space-y-4;
+
+      .resultFrame {
+        @apply bg-white shadow-md rounded-lg overflow-hidden;
+
+        .resultRow {
+          @apply flex;
+
+          .resultCellImage {
+            @apply w-24 h-24 flex-shrink-0;
+
+            img {
+              @apply w-full h-full object-cover;
+            }
+          }
+
+          .resultCellContent {
+            @apply p-4 flex-grow;
+
+            .itemCategory {
+              @apply text-sm text-gray-600 mb-1;
+            }
+
+            .itemTitle {
+              @apply text-lg font-semibold mb-2;
+            }
+
+            .itemQuote {
+              @apply text-sm text-gray-700;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .searchPaging {
+    @apply mt-4;
+  }
+}
+
+.itemHeader {
+  @apply text-blue-600 hover:text-blue-800;
+}

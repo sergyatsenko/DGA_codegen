@@ -1,0 +1,85 @@
+.innerContentSide {
+  @apply w-1/4 pr-4;
+
+  .greyBox {
+    @apply bg-gray-100 rounded-lg p-4;
+
+    .boxContentSection {
+      .rightContentSection {
+        .sectionHeader {
+          @apply text-xl font-bold mb-4;
+        }
+
+        .sectionBody {
+          .filterOptions {
+            .formLegend {
+              @apply text-sm text-indigo-700 mb-2;
+            }
+          }
+
+          .coveoHierarchicalFacet {
+            @apply mb-4;
+
+            .coveoFacetHeader {
+              @apply flex justify-between items-center mb-2;
+
+              .coveoFacetHeaderTitleSection {
+                @apply flex items-center;
+
+                .coveoIconCustom {
+                  @apply w-4 h-4 mr-2;
+                }
+
+                .coveoFacetHeaderTitle {
+                  @apply font-bold;
+                }
+              }
+
+              .coveoFacetHeaderSettingsSection {
+                .coveoFacetHeaderEraser {
+                  @apply cursor-pointer;
+
+                  .coveoIcon {
+                    @apply w-4 h-4;
+                  }
+                }
+              }
+            }
+
+            .facetList {
+              @apply list-none p-0;
+
+              .coveoFacetValue {
+                @apply mb-1;
+
+                .coveoFacetValueLabelWrapper {
+                  @apply flex items-center;
+
+                  .coveoFacetValueCount {
+                    @apply text-sm text-gray-500 mr-2;
+                  }
+
+                  .coveoFacetValueCaption {
+                    @apply text-sm;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .advancedSearchOptions {
+          @apply font-bold mt-4 mb-2;
+        }
+
+        .infoLink {
+          @apply space-y-2;
+
+          .searchLinks {
+            @apply block text-blue-600 hover:text-blue-800 text-sm;
+          }
+        }
+      }
+    }
+  }
+}

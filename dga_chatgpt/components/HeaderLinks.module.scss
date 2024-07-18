@@ -1,0 +1,33 @@
+.headerLinksContainer {
+  @apply flex flex-col md:flex-row items-center justify-between p-4 bg-gray-800 text-white;
+
+  .emblemLogo {
+    @apply text-2xl font-bold no-underline text-white;
+  }
+
+  .btnRight {
+    @apply flex items-center;
+
+    .btn {
+      @apply bg-blue-500 text-white font-semibold py-2 px-4 rounded;
+      &:hover {
+        @apply bg-blue-700;
+      }
+    }
+
+    .autoBttn {
+      @apply ml-4;
+    }
+  }
+
+  .welcomeLinks {
+    @apply flex flex-col md:flex-row space-x-4;
+
+    .link {
+      @apply text-white no-underline;
+      &:hover {
+        @apply underline;
+      }
+    }
+  }
+}
