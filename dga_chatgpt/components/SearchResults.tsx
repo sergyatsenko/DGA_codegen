@@ -9,6 +9,7 @@ interface ApiResponse {
 export default function SearchResults() {
   const [result, setResult] = useState<string>("");
   const [inputData, setInputData] = useState<string>("");
+  const [pageNumber, setPageNumber] = useState<string>("1");
 
   const makeRequest = async (method: string, body: string | null = null) => {
     try {
@@ -20,12 +21,20 @@ export default function SearchResults() {
         },
       };
 
-      if (method === "POST" && body) {
-        options.body = JSON.stringify({ data: body });
-      }
+      let requestUrl = "/api/search";
 
-      var requestUrl =
-        method === "GET" ? `/api/search?q=${body}` : "/api/search";
+      if (method === "GET") {
+        const queryParams = new URLSearchParams({
+          ...(body ? { q: body } : {}),
+          page: pageNumber,
+        });
+        requestUrl += `?${queryParams}`;
+      } else if (method === "POST") {
+        options.body = JSON.stringify({
+          data: body,
+          page: pageNumber,
+        });
+      }
 
       const response = await fetch(requestUrl, options);
       console.log("search response: ", response);
@@ -45,6 +54,11 @@ export default function SearchResults() {
     setInputData(e.target.value);
   };
 
+  const handlePageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("page change", e.target.value);
+    setPageNumber(e.target.value);
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>, method: string) => {
     console.log("submitting form...");
     e.preventDefault();
@@ -55,7 +69,6 @@ export default function SearchResults() {
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">API Interaction Example</h1>
-
       <div className="mb-4">
         <label htmlFor="inputData" className="block mb-2 font-medium">
           Input Data:
@@ -69,7 +82,20 @@ export default function SearchResults() {
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-
+      <div className="mb-4">
+        <label htmlFor="pageNumber" className="block mb-2 font-medium">
+          Page Number:
+        </label>
+        <input
+          id="pageNumber"
+          type="number"
+          value={pageNumber}
+          onChange={handlePageChange}
+          placeholder="Enter page number..."
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          min="1"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-2 mb-4">
         <button
           onClick={() => makeRequest("GET", inputData)}
@@ -83,7 +109,6 @@ export default function SearchResults() {
           </button>
         </form>
       </div>
-
       <div className="border border-gray-300 rounded-md p-4">
         <h2 className="text-lg font-semibold mb-2">API Response:</h2>
         <pre className="bg-gray-100 p-4 rounded-md overflow-auto whitespace-pre-wrap">
