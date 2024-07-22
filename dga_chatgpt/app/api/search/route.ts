@@ -29,7 +29,7 @@ interface PaginatedResponse {
 interface SearchParams {
   q: string;
   page: number;
-  sort?: { [key: string]: "asc" | "desc" };
+  sort?: { field: string; order: "asc" | "desc" };
   facets?: { [key: string]: string[] };
 }
 
@@ -56,14 +56,18 @@ export async function POST(request: NextRequest) {
     const sort = body.sort || {};
     const facetFilters = body.facets || {};
 
+    console.log("sort", sort);
+
     const searchOptions = {
       includeTotalCount: true,
       facets: ["metaAuthor", "languageCode"],
       skip: (page - 1) * RESULTS_PER_PAGE,
       top: RESULTS_PER_PAGE,
-      orderBy: Object.entries(sort).map(
-        ([field, order]) => `${field} ${order}`
-      ),
+      // orderBy: Object.entries(sort).map(
+      //   ([field, order]) => `${field} ${order}`
+      // ),
+      //orderBy: [`${sort.field} ${sort.order}`],
+      orderBy: [],
       filter: Object.entries(facetFilters)
         .map(([field, values]) =>
           values.map((value) => `${field} eq '${value}'`).join(" or ")
@@ -71,6 +75,12 @@ export async function POST(request: NextRequest) {
         .filter((filter) => filter !== "")
         .join(" and "),
     };
+
+    if (sort && sort.field && sort.order) {
+      searchOptions.orderBy = [`${sort.field} ${sort.order}`];
+    }
+
+    console.log("searchOptions", searchOptions);
 
     const search = await client.search(query, searchOptions);
 

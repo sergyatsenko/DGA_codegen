@@ -10,6 +10,8 @@ export default function SearchResults() {
   const [result, setResult] = useState<string>("");
   const [inputData, setInputData] = useState<string>("");
   const [pageNumber, setPageNumber] = useState<string>("1");
+  const [sortField, setSortField] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const makeRequest = async (method: string, body: string | null = null) => {
     try {
@@ -27,12 +29,16 @@ export default function SearchResults() {
         const queryParams = new URLSearchParams({
           ...(body ? { q: body } : {}),
           page: pageNumber,
+          ...(sortField ? { sortField, sortOrder } : {}),
         });
         requestUrl += `?${queryParams}`;
       } else if (method === "POST") {
         options.body = JSON.stringify({
-          data: body,
+          q: body,
           page: pageNumber,
+          ...(sortField
+            ? { sort: { field: sortField, order: sortOrder } }
+            : {}),
         });
       }
 
@@ -57,6 +63,16 @@ export default function SearchResults() {
   const handlePageChange = (e: ChangeEvent<HTMLInputElement>) => {
     console.log("page change", e.target.value);
     setPageNumber(e.target.value);
+  };
+
+  const handleSortFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("sort field change", e.target.value);
+    setSortField(e.target.value);
+  };
+
+  const handleSortOrderChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log("sort order change", e.target.value);
+    setSortOrder(e.target.value as "asc" | "desc");
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>, method: string) => {
@@ -95,6 +111,33 @@ export default function SearchResults() {
           className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           min="1"
         />
+      </div>
+      <div className="mb-4">
+        <label htmlFor="sortField" className="block mb-2 font-medium">
+          Sort Field:
+        </label>
+        <input
+          id="sortField"
+          type="text"
+          value={sortField}
+          onChange={handleSortFieldChange}
+          placeholder="Enter sort field..."
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div className="mb-4">
+        <label htmlFor="sortOrder" className="block mb-2 font-medium">
+          Sort Order:
+        </label>
+        <select
+          id="sortOrder"
+          value={sortOrder}
+          onChange={handleSortOrderChange}
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
       </div>
       <div className="grid grid-cols-2 gap-2 mb-4">
         <button
