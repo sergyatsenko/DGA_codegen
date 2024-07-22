@@ -12,7 +12,7 @@ export default function SearchResults() {
 
   const makeRequest = async (method: string, body: string | null = null) => {
     try {
-      console.log("making request...");
+      console.log("making request...", method, body);
       const options: RequestInit = {
         method,
         headers: {
@@ -20,11 +20,14 @@ export default function SearchResults() {
         },
       };
 
-      if (body) {
+      if (method === "POST" && body) {
         options.body = JSON.stringify({ data: body });
       }
 
-      const response = await fetch("/api/search", options);
+      var requestUrl =
+        method === "GET" ? `/api/search?q=${body}` : "/api/search";
+
+      const response = await fetch(requestUrl, options);
       console.log("search response: ", response);
       const data: ApiResponse = await response.json();
       setResult(JSON.stringify(data, null, 2));
@@ -38,12 +41,14 @@ export default function SearchResults() {
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("input change", e.target.value);
     setInputData(e.target.value);
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>, method: string) => {
     console.log("submitting form...");
     e.preventDefault();
+    console.log("handleSubmit: ", method, inputData);
     makeRequest(method, inputData);
   };
 
@@ -53,7 +58,7 @@ export default function SearchResults() {
 
       <div className="mb-4">
         <label htmlFor="inputData" className="block mb-2 font-medium">
-          Input Data (for POST/PUT):
+          Input Data:
         </label>
         <input
           id="inputData"
@@ -66,7 +71,10 @@ export default function SearchResults() {
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-4">
-        <button onClick={() => makeRequest("GET")} className={buttonClasses}>
+        <button
+          onClick={() => makeRequest("GET", inputData)}
+          className={buttonClasses}
+        >
           GET Request
         </button>
         <form onSubmit={(e) => handleSubmit(e, "POST")} className="contents">
@@ -74,14 +82,6 @@ export default function SearchResults() {
             POST Request
           </button>
         </form>
-        <form onSubmit={(e) => handleSubmit(e, "PUT")} className="contents">
-          <button type="submit" className={buttonClasses}>
-            PUT Request
-          </button>
-        </form>
-        <button onClick={() => makeRequest("DELETE")} className={buttonClasses}>
-          DELETE Request
-        </button>
       </div>
 
       <div className="border border-gray-300 rounded-md p-4">

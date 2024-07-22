@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const results: SearchResult[] = [];
 
     for await (const result of search.results) {
-      console.log(result.document);
+      //console.log(result.document);
       //console.log("fields", result.document.url, result.document.title);
       //console.log(result.document.url);
       results.push({
