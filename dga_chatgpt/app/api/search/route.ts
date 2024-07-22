@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { SearchClient, AzureKeyCredential } from "@azure/search-documents";
 
 interface SearchResult {
@@ -10,10 +9,16 @@ interface SearchResult {
   metaDescription: string;
   metaTitle: string;
   metaAuthor: string;
+  languageCode: string;
+}
+
+interface Facets {
+  metaAuthor: { value: string; count: number }[];
+  languageCode: { value: string; count: number }[];
 }
 
 const searchEndpoint = process.env.SEARCH_ENDPOINT || "";
-const searchIndex = process.env.SEARCH_INDEX || "defaultIndex"; // Provide a default value for SEARCH_INDEX
+const searchIndex = process.env.SEARCH_INDEX || "defaultIndex";
 const client = new SearchClient(
   searchEndpoint,
   searchIndex,
@@ -26,14 +31,20 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
 
-    const search = await client.search(query);
+    const searchOptions = {
+      includeTotalCount: true,
+      facets: ["metaAuthor", "languageCode"],
+    };
+
+    const search = await client.search(query, searchOptions);
 
     const results: SearchResult[] = [];
+    const facets: Facets = {
+      metaAuthor: [],
+      languageCode: [],
+    };
 
     for await (const result of search.results) {
-      //console.log(result.document);
-      //console.log("fields", result.document.url, result.document.title);
-      //console.log(result.document.url);
       results.push({
         id: result.document.id,
         url: result.document.url,
@@ -42,12 +53,29 @@ export async function GET(request: NextRequest) {
         metaDescription: result.document.metaDescription,
         metaTitle: result.document.metaTitle,
         metaAuthor: result.document.metaAuthor,
+        languageCode: result.document.languageCode,
       });
+    }
+
+    //console.log("Search facets", search.facets);
+    if (search.facets) {
+      facets.metaAuthor =
+        search.facets.metaAuthor?.map((facet) => ({
+          value: facet.value,
+          count: facet.count,
+        })) || [];
+
+      facets.languageCode =
+        search.facets.languageCode?.map((facet) => ({
+          value: facet.value,
+          count: facet.count,
+        })) || [];
     }
 
     return NextResponse.json(
       {
         count: search.count,
+        facets: facets,
         results: results,
       },
       { status: 200 }
