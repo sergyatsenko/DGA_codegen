@@ -12,6 +12,7 @@ export default function SearchResults() {
   const [pageNumber, setPageNumber] = useState<string>("1");
   const [sortField, setSortField] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [facets, setFacets] = useState<string>("");
 
   const makeRequest = async (method: string, body: string | null = null) => {
     try {
@@ -25,11 +26,17 @@ export default function SearchResults() {
 
       let requestUrl = "/api/search";
 
+      const facetsArray = facets
+        .split(",")
+        .map((facet) => facet.trim())
+        .filter(Boolean);
+
       if (method === "GET") {
         const queryParams = new URLSearchParams({
           ...(body ? { q: body } : {}),
           page: pageNumber,
           ...(sortField ? { sortField, sortOrder } : {}),
+          ...(facetsArray.length > 0 ? { facets: facetsArray.join(",") } : {}),
         });
         requestUrl += `?${queryParams}`;
       } else if (method === "POST") {
@@ -39,8 +46,11 @@ export default function SearchResults() {
           ...(sortField
             ? { sort: { field: sortField, order: sortOrder } }
             : {}),
+          ...(facetsArray.length > 0 ? { facets: facetsArray } : {}),
         });
       }
+
+      console.log("options.body", options.body);
 
       const response = await fetch(requestUrl, options);
       console.log("search response: ", response);
@@ -73,6 +83,11 @@ export default function SearchResults() {
   const handleSortOrderChange = (e: ChangeEvent<HTMLSelectElement>) => {
     console.log("sort order change", e.target.value);
     setSortOrder(e.target.value as "asc" | "desc");
+  };
+
+  const handleFacetsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("facets change", e.target.value);
+    setFacets(e.target.value);
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>, method: string) => {
@@ -138,6 +153,19 @@ export default function SearchResults() {
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
         </select>
+      </div>
+      <div className="mb-4">
+        <label htmlFor="facets" className="block mb-2 font-medium">
+          Facets:
+        </label>
+        <input
+          id="facets"
+          type="text"
+          value={facets}
+          onChange={handleFacetsChange}
+          placeholder="Enter comma-separated facets..."
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
       <div className="grid grid-cols-2 gap-2 mb-4">
         <button

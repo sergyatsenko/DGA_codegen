@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     const facetFilters = body.facets || {};
 
     console.log("sort", sort);
+    console.log("facetFilters", facetFilters);
 
     const searchOptions = {
       includeTotalCount: true,
