@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SearchClient, AzureKeyCredential } from "@azure/search-documents";
 
+// Interfaces
 interface SearchResult {
   id: string;
   url: string;
@@ -12,9 +13,14 @@ interface SearchResult {
   languageCode: string;
 }
 
+interface FacetValue {
+  value: string;
+  count: number;
+}
+
 interface Facets {
-  metaAuthor: { value: string; count: number }[];
-  languageCode: { value: string; count: number }[];
+  metaAuthor: FacetValue[];
+  languageCode: FacetValue[];
 }
 
 interface PaginatedResponse {
@@ -23,8 +29,7 @@ interface PaginatedResponse {
   currentPage: number;
   resultsPerPage: number;
   results: SearchResult[];
-  //facets: Facets;
-  facets: [];
+  facets: Facets;
   filters: string[];
 }
 
@@ -35,65 +40,47 @@ interface SearchParams {
   filters?: string[];
 }
 
-const searchEndpoint = process.env.SEARCH_ENDPOINT || "";
+// Constants
+const RESULTS_PER_PAGE = 10;
+const FACET_FIELDS = ["metaAuthor", "languageCode"] as const;
+
+// Environment variables
+const searchEndpoint = process.env.SEARCH_ENDPOINT;
 const searchIndex = process.env.SEARCH_INDEX || "defaultIndex";
+const searchKey = process.env.SEARCH_KEY;
+
+// Validation
+if (!searchEndpoint || !searchKey) {
+  throw new Error("Missing required environment variables");
+}
+
+// Initialize search client
 const client = new SearchClient(
   searchEndpoint,
   searchIndex,
-  new AzureKeyCredential(process.env.SEARCH_KEY ?? "")
+  new AzureKeyCredential(searchKey)
 );
-
-const RESULTS_PER_PAGE = 10;
-
-export async function GET(request: NextRequest) {
-  // ... (GET method remains unchanged)
-}
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("POST request received");
     const body: SearchParams = await request.json();
-    const query = body.q || "";
-    const page = body.page || 1;
-    const sort = body.sort || {};
-    //const filter = body.facets || "";
-
-    console.log("sort", sort);
-    console.log("facetFilters", body.facets);
+    const { q = "", page = 1, sort, filters } = body;
 
     const searchOptions = {
       includeTotalCount: true,
-      facets: ["metaAuthor", "languageCode"],
+      facets: FACET_FIELDS,
       skip: (page - 1) * RESULTS_PER_PAGE,
       top: RESULTS_PER_PAGE,
-      // orderBy: Object.entries(sort).map(
-      //   ([field, order]) => `${field} ${order}`
-      // ),
-      //orderBy: [`${sort.field} ${sort.order}`],
-      orderBy: [],
-      filter: "",
-      // filter: Object.entries(facetFilters)
-      //   .map(([field, values]) =>
-      //     values.map((value) => `${field} eq '${value}'`).join(" or ")
-      //   )
-      //   .filter((filter) => filter !== "")
-      //   .join(" and "),
+      orderBy:
+        sort && sort?.field && sort?.order
+          ? [`${sort.field} ${sort.order}`]
+          : [],
+      filter: filters ? filters.join(" and ") : "",
     };
 
-    if (body.filters) {
-      searchOptions.filter = body.filters.join(" and ");
-    }
-    console.log("searchOptions.filter", searchOptions.filter);
+    console.log("Search options:", JSON.stringify(searchOptions, null, 2));
 
-    //searchOptions.filter = "metaAuthor eq 'Melissa Zaidan'";
-
-    if (sort && sort.field && sort.order) {
-      searchOptions.orderBy = [`${sort.field} ${sort.order}`];
-    }
-
-    console.log("searchOptions", searchOptions);
-
-    const search = await client.search(query, searchOptions);
+    const search = await client.search(q, searchOptions);
 
     const results: SearchResult[] = [];
     const facets: Facets = {
@@ -102,33 +89,17 @@ export async function POST(request: NextRequest) {
     };
 
     for await (const result of search.results) {
-      //console.log("result:", result);
-      results.push({
-        id: result.document.id,
-        url: result.document.url,
-        title: result.document.title,
-        contentSummary: result.document.contentSummary,
-        metaDescription: result.document.metaDescription,
-        metaTitle: result.document.metaTitle,
-        metaAuthor: result.document.metaAuthor,
-        languageCode: result.document.languageCode,
-      });
+      results.push(result.document as SearchResult);
     }
 
-    //console.log("search.facets values: ", search.facets);
-
     if (search.facets) {
-      facets.metaAuthor =
-        search.facets.metaAuthor?.map((facet) => ({
-          value: facet.value,
-          count: facet.count,
-        })) || [];
-
-      facets.languageCode =
-        search.facets.languageCode?.map((facet) => ({
-          value: facet.value,
-          count: facet.count,
-        })) || [];
+      FACET_FIELDS.forEach((field) => {
+        facets[field] =
+          search.facets[field]?.map((facet) => ({
+            value: facet.value,
+            count: facet.count,
+          })) || [];
+      });
     }
 
     const totalResults = search.count || 0;
@@ -141,9 +112,10 @@ export async function POST(request: NextRequest) {
       resultsPerPage: RESULTS_PER_PAGE,
       facets,
       results,
+      filters: filters || [],
     };
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error in POST request:", error);
     return NextResponse.json(
