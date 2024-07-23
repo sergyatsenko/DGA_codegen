@@ -46,7 +46,7 @@ export default function SearchResults() {
           ...(sortField
             ? { sort: { field: sortField, order: sortOrder } }
             : {}),
-          ...(facetsArray.length > 0 ? { facets: facetsArray } : {}),
+          ...(facetsArray.length > 0 ? { filters: facetsArray } : {}),
         });
       }
 

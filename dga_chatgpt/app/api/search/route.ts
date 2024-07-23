@@ -23,14 +23,16 @@ interface PaginatedResponse {
   currentPage: number;
   resultsPerPage: number;
   results: SearchResult[];
-  facets: Facets;
+  //facets: Facets;
+  facets: [];
+  filters: string[];
 }
 
 interface SearchParams {
   q: string;
   page: number;
   sort?: { field: string; order: "asc" | "desc" };
-  facets?: { [key: string]: string[] };
+  filters?: string[];
 }
 
 const searchEndpoint = process.env.SEARCH_ENDPOINT || "";
@@ -54,10 +56,10 @@ export async function POST(request: NextRequest) {
     const query = body.q || "";
     const page = body.page || 1;
     const sort = body.sort || {};
-    const facetFilters = body.facets || {};
+    //const filter = body.facets || "";
 
     console.log("sort", sort);
-    console.log("facetFilters", facetFilters);
+    console.log("facetFilters", body.facets);
 
     const searchOptions = {
       includeTotalCount: true,
@@ -69,13 +71,21 @@ export async function POST(request: NextRequest) {
       // ),
       //orderBy: [`${sort.field} ${sort.order}`],
       orderBy: [],
-      filter: Object.entries(facetFilters)
-        .map(([field, values]) =>
-          values.map((value) => `${field} eq '${value}'`).join(" or ")
-        )
-        .filter((filter) => filter !== "")
-        .join(" and "),
+      filter: "",
+      // filter: Object.entries(facetFilters)
+      //   .map(([field, values]) =>
+      //     values.map((value) => `${field} eq '${value}'`).join(" or ")
+      //   )
+      //   .filter((filter) => filter !== "")
+      //   .join(" and "),
     };
+
+    if (body.filters) {
+      searchOptions.filter = body.filters.join(" and ");
+    }
+    console.log("searchOptions.filter", searchOptions.filter);
+
+    //searchOptions.filter = "metaAuthor eq 'Melissa Zaidan'";
 
     if (sort && sort.field && sort.order) {
       searchOptions.orderBy = [`${sort.field} ${sort.order}`];
@@ -92,6 +102,7 @@ export async function POST(request: NextRequest) {
     };
 
     for await (const result of search.results) {
+      //console.log("result:", result);
       results.push({
         id: result.document.id,
         url: result.document.url,
@@ -103,6 +114,8 @@ export async function POST(request: NextRequest) {
         languageCode: result.document.languageCode,
       });
     }
+
+    //console.log("search.facets values: ", search.facets);
 
     if (search.facets) {
       facets.metaAuthor =
