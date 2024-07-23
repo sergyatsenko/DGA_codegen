@@ -41,7 +41,7 @@ export default function SearchResults() {
           ...prev,
           filters: value
             .split(",")
-            .map((filter) => filter.trim())
+            .map((filter) => filter)
             .filter(Boolean),
         };
       }
